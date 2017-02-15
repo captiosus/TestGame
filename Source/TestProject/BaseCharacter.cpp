@@ -33,6 +33,11 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
+/**
+ * Adds the Delta to the current Health of the character
+ * @param Delta - change in health
+ * @returns nothing
+ **/
 void ABaseCharacter::CalculateHealth(float Delta)
 {
     Health += Delta;
