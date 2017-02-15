@@ -33,23 +33,25 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
-void ABaseCharacter::CalculateHealth(float Delta) {
+void ABaseCharacter::CalculateHealth(float Delta)
+{
     Health += Delta;
     CalculateDead();
 }
 
-
-void ABaseCharacter::CalculateDead() {
+void ABaseCharacter::CalculateDead()
+{
     if (Health <= 0) {
-        isDead = false;
+        bIsDead = false;
     } else {
-        isDead = true;
+        bIsDead = true;
     }
 }
 
 #if WITH_EDITOR
-void ABaseCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
-    isDead = false;
+void ABaseCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+    bIsDead = false;
     Health = 100;
     
     Super::PostEditChangeProperty(PropertyChangedEvent);
