@@ -12,7 +12,7 @@ class TESTPROJECT_API ABaseCharacter : public ACharacter
     
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Base Character")
-    float health = 100;
+    float Health = 5;
     
     UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Base Character")
     bool isDead = false;
