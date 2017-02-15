@@ -15,7 +15,7 @@ public:
     float Health = 5;
     
     UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Base Character")
-    bool isDead = false;
+    bool bIsDead = false;
     
     virtual void CalculateDead();
     
