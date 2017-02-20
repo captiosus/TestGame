@@ -10,6 +10,13 @@ class TESTPROJECT_API ARoom : public AActor
 {
 	GENERATED_BODY()
 	
+public:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Room")
+    TArray<int32> Doorways;
+    
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Room")
+    FString LevelName;
+
 public:	
 	// Sets default values for this actor's properties
 	ARoom();
@@ -21,10 +28,4 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-private:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess="true"));
-    TArray<UBoxComponent*> OverlapVolume;
-    
-	
 };

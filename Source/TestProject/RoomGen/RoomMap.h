@@ -3,16 +3,16 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "LevelMap.generated.h"
+#include "RoomMap.generated.h"
 
 UCLASS()
-class TESTPROJECT_API ALevelMap : public AActor
+class TESTPROJECT_API ARoomMap : public AActor
 {
 	GENERATED_BODY()
-	
+    
 public:	
 	// Sets default values for this actor's properties
-	ALevelMap();
+	ARoomMap();
 
 protected:
 	// Called when the game starts or when spawned
@@ -22,6 +22,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-private:
-    
+	
+	
 };

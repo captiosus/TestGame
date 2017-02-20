@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TestProject.h"
-#include "LevelMap.h"
-#include <vector>
+#include "RoomMap.h"
+
 
 // Sets default values
-ALevelMap::ALevelMap()
+ARoomMap::ARoomMap()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -13,20 +13,16 @@ ALevelMap::ALevelMap()
 }
 
 // Called when the game starts or when spawned
-void ALevelMap::BeginPlay()
+void ARoomMap::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void ALevelMap::Tick(float DeltaTime)
+void ARoomMap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-std::vector<Room> ALevelMap::GenerateRooms()
-{
-    
-}
