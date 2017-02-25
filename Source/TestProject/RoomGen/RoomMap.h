@@ -47,6 +47,5 @@ public:
     ARoom* FindRoom(const FName& Name) const;
     
 protected:
-    UFUNCTION(BlueprintCallable, Category="Room Map")
     virtual void BeginPlay() override;
 };

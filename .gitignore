@@ -5,3 +5,6 @@
 .DS_STORE
 #*#
 */xcuserdata/*
+.vs/
+*.sln
+*.VC.*

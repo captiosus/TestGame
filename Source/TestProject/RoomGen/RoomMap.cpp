@@ -12,18 +12,12 @@ ARoomMap::ARoomMap(){}
 
 void ARoomMap::SetAvailableRooms()
 {
-    auto ObjectLibrary = UObjectLibrary::CreateLibrary(UWorld::StaticClass(), false, true);
-    ObjectLibrary->LoadAssetDataFromPath(ROOMS_PATH);
-    TArray<FAssetData> AssetDatas;
-    ObjectLibrary->GetAssetDataList(AssetDatas);
-    
-    FName name;
-    for (int32 i = 0; i < AssetDatas.Num(); ++i)
-    {
-        FAssetData& AssetData = AssetDatas[i];
-        name = AssetData.AssetName;
-        this->AvailableRooms.Add(name);
-    }
+	for (TActorIterator<ARoom> RoomItr(GetWorld()); RoomItr; ++RoomItr)
+	{
+		// Same as with the Object Iterator, access the subclass instance with the * or -> operators.
+		ARoom *Room = *RoomItr;
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, Room->LevelName.ToString());
+	}
 }
 
 ARoom* ARoomMap::FindRoom(const FName& Name) const
@@ -43,6 +37,7 @@ ARoom* ARoomMap::FindRoom(const FName& Name) const
 void ARoomMap::BeginPlay()
 {
     Super::BeginPlay();
+	SetAvailableRooms();
     if (this->Spawn)
     {
 //        GenerateRooms();
@@ -55,7 +50,7 @@ void ARoomMap::ShuffleSentinels()
 {
     uint32 ShuffleIndex;
     ARoom* Swapper;
-    for (uint32 i = 0; i < Sentinels.Num(); ++i )
+    for (int32 i = 0; i < Sentinels.Num(); ++i )
     {
         ShuffleIndex = FMath::FRandRange(0, i);
         if (i != ShuffleIndex)
