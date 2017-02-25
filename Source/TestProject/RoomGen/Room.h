@@ -5,26 +5,81 @@
 #include "GameFramework/Actor.h"
 #include "Room.generated.h"
 
+UENUM(BlueprintType)
+enum class EDoorDirection : uint8 {
+    DD_North    UMETA(DisplayName="North"),
+    DD_East     UMETA(DisplayName="East"),
+    DD_South    UMETA(DisplayName="South"),
+    DD_West     UMETA(DisplayName="West")
+};
+
+USTRUCT(BlueprintType)
+struct FPosition{
+    GENERATED_BODY()
+
+    UPROPERTY(VisibleAnywhere, Category="Room")
+    int8 x;
+    UPROPERTY(VisibleAnywhere, Category="Room")
+    int8 y;
+
+    FPosition(int8 newx=0, int8 newy=0);
+    FPosition(const FPosition& Other);
+    FPosition operator+(const FPosition& Other);
+    FPosition& operator+=(const FPosition& Other);
+    bool operator==(const FPosition& Other) const;
+} ;
+
+inline uint32 GetTypeHash(const FPosition& Position)
+{
+    uint32 Hashed(0);
+    (Hashed += Position.x >> 16) += Position.y;
+    return Hashed;
+}
+
+EDoorDirection GetOpposite(const EDoorDirection& Direction);
+FPosition GetPosition(const EDoorDirection& Direction);
+
+class ARoom;
+
 UCLASS()
 class TESTPROJECT_API ARoom : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	ARoom();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+public:
+	ARoom();// Sets defaults for this object
+	ARoom(const FPosition& MapLocation); // Copy constructor
+    ARoom& operator+=(ARoom& Other);
+    bool operator==(const ARoom& Other) const;
+    bool operator!=(const ARoom& Other) const;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+    UPROPERTY(BlueprintReadOnly, EditInstanceOnly, Category="Room")
+    FName LevelName;
 
-private:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess="true"));
-    TArray<UBoxComponent*> OverlapVolume;
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category="Room")
+    FPosition Location;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category="Room")
+    TMap<EDoorDirection, ARoom*> Doors;
+
+    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Room")
+    TMap<EDoorDirection, bool>  OpenDoors;
+
+    UFUNCTION(BlueprintCallable, Category="Room")
+    bool bDoesRoomFit(const FName& RoomName) const;
+
+    UFUNCTION(BlueprintCallable, Category="Room")
+    ARoom* InsertRoom(const FName& RoomName);
+
+    UFUNCTION(BlueprintCallable, Category="Room")
+    TArray<ARoom*> ConstructSentinels();
+
+    UFUNCTION(BlueprintCallable, Category="Room")
+    void LoadRoom();
+
+    UFUNCTION(BlueprintCallable, Category="Room")
+    void LoadRooms() const;
     
-	
+    UFUNCTION(BlueprintCallable, Category="Room")
+    ARoom* FindRoom(const FName& Name) const;
 };
