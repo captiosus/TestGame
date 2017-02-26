@@ -92,12 +92,13 @@ bool ARoom::operator !=(const ARoom& Other) const
     return !(*this == Other);
 }
 
-bool ARoom::bDoesRoomFit(const FName& RoomName) const
+//Sentinel Method for determining if a room is a valid fit for the current position
+bool ARoom::bDoesRoomFit(ARoom* Room) const
 {
-    ARoom* Room = FindRoom(RoomName);
-    for( auto& Doorway : this->OpenDoors )
+    // Checks each existing connection for an open match in new room
+    for( auto& Doorway : this->Doors )
     {
-        if (Doorway.Value != Room->OpenDoors[Doorway.Key])
+        if (!Room->OpenDoors[Doorway.Key])
         {
             return false;
         }
@@ -105,43 +106,39 @@ bool ARoom::bDoesRoomFit(const FName& RoomName) const
     return true;
 }
 
-ARoom* ARoom::FindRoom(const FName& Name) const
+void ARoom::InsertRoom(ARoom *Room)
 {
-    for(TActorIterator<ARoom> RoomItr(GetWorld()); RoomItr; ++RoomItr)
-    {
-        ARoom *Room = *RoomItr;
-        if (Room->LevelName == Name)
-        {
-            return Room;
-        }
-    }
-    return nullptr;
-}
-
-ARoom* ARoom::InsertRoom(const FName& RoomName)
-{
-    ARoom* Room = FindRoom(RoomName);
     for (auto& Doorway : this->Doors)
     {
         Doorway.Value->Doors[GetOpposite(Doorway.Key)] = Room;
+        Room->Doors.Add(Doorway.Key, Doorway.Value);
         this->Doors[Doorway.Key] = NULL;
     }
-    return Room;
+    Room->Location = this->Location;
+}
+
+void ARoom::Unlink()
+{
+    for (auto& Doorway : this->Doors)
+    {
+        Doorway.Value->Doors.RemoveAt(GetOpposite(Doorway.Key));
+    }
+    this->Doors.Empty();
 }
 
 TArray<ARoom*> ARoom::ConstructSentinels()
 {
-    TArray<ARoom*> sentinels;
+    TArray<ARoom*> Sentinels;
     for (auto& Doorway : this->OpenDoors)
     {
         if (!this->Doors.Contains(Doorway.Key))
         {
             this->Doors.Add(Doorway.Key, NewObject<ARoom>(this));
             this->Doors[Doorway.Key]->Location = this->Location + GetPosition(Doorway.Key);
-            sentinels.Add(this->Doors[Doorway.Key]);
+            Sentinels.Add(this->Doors[Doorway.Key]);
         }
     }
-    return sentinels;
+    return Sentinels;
 }
 
 void ARoom::LoadRooms() const
@@ -154,6 +151,8 @@ void ARoom::LoadRooms() const
 
 void ARoom::LoadRoom()
 {
-   FLatentActionInfo LatentInfo;
-   UGameplayStatics::LoadStreamLevel(this, this->LevelName, true, true, LatentInfo);
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, LevelName.ToString());
+    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Is being loaded"));
+   // FLatentActionInfo LatentInfo;
+   // UGameplayStatics::LoadStreamLevel(this, this->LevelName, true, true, LatentInfo);
 }

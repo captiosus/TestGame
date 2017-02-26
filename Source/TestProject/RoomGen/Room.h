@@ -56,6 +56,9 @@ public:
     UPROPERTY(BlueprintReadOnly, EditInstanceOnly, Category="Room")
     FName LevelName;
 
+    UPROPERTY(BlueprintReadOnly, EditInstanceOnly, Category="Room")
+    bool bIsSpawn;
+
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category="Room")
     FPosition Location;
 
@@ -66,10 +69,13 @@ public:
     TMap<EDoorDirection, bool>  OpenDoors;
 
     UFUNCTION(BlueprintCallable, Category="Room")
-    bool bDoesRoomFit(const FName& RoomName) const;
+    bool bDoesRoomFit(ARoom *Room) const;
 
     UFUNCTION(BlueprintCallable, Category="Room")
-    ARoom* InsertRoom(const FName& RoomName);
+    void InsertRoom(ARoom *Room);
+
+    UFUNCTION(BlueprintCallable, Category="Room")
+    void Unlink();
 
     UFUNCTION(BlueprintCallable, Category="Room")
     TArray<ARoom*> ConstructSentinels();
@@ -79,7 +85,4 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Room")
     void LoadRooms() const;
-    
-    UFUNCTION(BlueprintCallable, Category="Room")
-    ARoom* FindRoom(const FName& Name) const;
 };

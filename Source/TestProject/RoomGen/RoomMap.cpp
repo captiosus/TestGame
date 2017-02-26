@@ -4,33 +4,40 @@
 #include "RoomMap.h"
 
 const int NUM_ROOM_FIT_TRIES = 5;
-const FString ROOMS_PATH = TEXT("/Game/Rooms");
-
 
 // Sets default values
 ARoomMap::ARoomMap(){}
 
+void ARoomMap::PickSpawn()
+{
+    if(AvailableSpawns.Num() > 0)
+    {
+        uint32 SpawnIndex = FMath::FRandRange(0, AvailableSpawns.Num() - 1);
+        this->Spawn = AvailableSpawns[SpawnIndex];
+        AddSentinels(Spawn->ConstructSentinels());
+        AvailableSpawns.RemoveAt(SpawnIndex);
+        Map.Add(Spawn->Location, Spawn);
+        ++NumRooms;
+    }
+}
+
 void ARoomMap::SetAvailableRooms()
 {
+
 	for (TActorIterator<ARoom> RoomItr(GetWorld()); RoomItr; ++RoomItr)
 	{
 		// Same as with the Object Iterator, access the subclass instance with the * or -> operators.
 		ARoom *Room = *RoomItr;
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, Room->LevelName.ToString());
-	}
-}
-
-ARoom* ARoomMap::FindRoom(const FName& Name) const
-{
-    for(TActorIterator<ARoom> RoomItr(GetWorld()); RoomItr; ++RoomItr)
-    {
-        ARoom *Room = *RoomItr;
-        if (Room->LevelName == Name)
+        if (Room->bIsSpawn)
         {
-            return Room;
+            this->AvailableSpawns.Add(Room);
         }
-    }
-    return nullptr;
+        else
+        {
+            this->AvailableRooms.Add(Room);
+        }
+	}
 }
 
 // Called when the game starts or when spawned
@@ -38,10 +45,16 @@ void ARoomMap::BeginPlay()
 {
     Super::BeginPlay();
 	SetAvailableRooms();
+    PickSpawn();
     if (this->Spawn)
     {
-//        GenerateRooms();
-        this->Spawn->LoadRoom();
+       GenerateMap();
+       this->Spawn->LoadRoom();
+       CleanupSentinels();
+    }
+    else
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("No Spawn"));
     }
 }
 
@@ -75,4 +88,44 @@ void ARoomMap::AddSentinels(const TArray<ARoom*>& New)
         }
     }
     ShuffleSentinels();
+}
+
+void ARoomMap::CleanupSentinels()
+{
+    for (ARoom* Sentinel : Sentinels)
+    {
+        Sentinel->Unlink();
+        Map.Remove(Sentinel->Location);
+    }
+    Sentinels.Empty();
+}
+
+void ARoomMap::GenerateMap()
+{
+    if (!this->Spawn)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("No Spawn"));
+        return;
+    }
+    while (AvailableRooms.Num() > 0 && Sentinels.Num() > 0 && NumRooms < MaxRooms)
+    {
+        uint32 RoomIndex = FMath::FRandRange(0, AvailableRooms.Num() - 1);
+        ARoom *Room = AvailableRooms[RoomIndex];
+        uint8 Tries = 0;
+        do
+        {
+            uint32 SentinelIndex = FMath::FRandRange(0, Sentinels.Num() - 1);
+            ARoom *Sentinel = Sentinels[SentinelIndex];
+            if (Sentinel->bDoesRoomFit(Room))
+            {
+                Sentinel->InsertRoom(Room);
+                AddSentinels(Room->ConstructSentinels());
+                Sentinels.RemoveAt(SentinelIndex);
+                Room->LoadRoom();
+                ++NumRooms;
+                break;
+            }
+        } while (Tries++ < NUM_ROOM_FIT_TRIES);
+        AvailableRooms.RemoveAt(RoomIndex);
+    }
 }

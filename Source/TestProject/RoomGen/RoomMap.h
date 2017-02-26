@@ -17,9 +17,12 @@ public:
 	ARoomMap();
 
     UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Room Map")
-    TArray<FName> AvailableRooms;
-    
-    UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Room Map")
+    TArray<ARoom*> AvailableSpawns;
+
+    UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category="Room Map")
+    TArray<ARoom*> AvailableRooms;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category="Room Map")
     ARoom* Spawn;
 
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Room Map")
@@ -35,17 +38,24 @@ public:
     TMap<FPosition, ARoom*> Map;
 
     UFUNCTION(BlueprintCallable, Category="Room Map")
+    void PickSpawn();
+
+    UFUNCTION(BlueprintCallable, Category="Room Map")
     void SetAvailableRooms();
-    
+
     UFUNCTION(BlueprintCallable, Category="Room Map")
     void ShuffleSentinels();
-    
+
     UFUNCTION(BlueprintCallable, Category="Room Map")
     void AddSentinels(const TArray<ARoom*>& New);
-    
-    UFUNCTION(BlueprintCallable, Category="Room")
-    ARoom* FindRoom(const FName& Name) const;
-    
+
+    UFUNCTION(BlueprintCallable, Category="Room Map")
+    void CleanupSentinels();
+
+    UFUNCTION(BlueprintCallable, Category="Room Map")
+    void GenerateMap();
+
 protected:
     virtual void BeginPlay() override;
+
 };
