@@ -77,7 +77,7 @@ void ARoomMap::ShuffleSentinels()
 
 void ARoomMap::AddSentinels(const TArray<ARoom*>& New)
 {
-    for(auto& RoomSentinel : New)
+    for(ARoom* RoomSentinel : New)
     {
         if (Map.Contains(RoomSentinel->Location))
         {
@@ -94,10 +94,9 @@ void ARoomMap::CleanupSentinels()
 {
     for (ARoom* Sentinel : Sentinels)
     {
-        Sentinel->Unlink();
         Map.Remove(Sentinel->Location);
     }
-    Sentinels.Empty();
+    Sentinels.Reset();
 }
 
 void ARoomMap::GenerateMap()
@@ -118,14 +117,15 @@ void ARoomMap::GenerateMap()
             ARoom *Sentinel = Sentinels[SentinelIndex];
             if (Sentinel->bDoesRoomFit(Room))
             {
-                Sentinel->InsertRoom(Room);
+                Room->TakePlace(Sentinel);
                 AddSentinels(Room->ConstructSentinels());
                 Sentinels.RemoveAt(SentinelIndex);
                 Room->LoadRoom();
+                Map[Room->Location] = Room;
                 ++NumRooms;
                 break;
             }
-        } while (Tries++ < NUM_ROOM_FIT_TRIES);
+        } while (++Tries < NUM_ROOM_FIT_TRIES);
         AvailableRooms.RemoveAt(RoomIndex);
     }
 }

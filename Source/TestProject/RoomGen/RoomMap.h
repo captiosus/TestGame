@@ -28,11 +28,14 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Room Map")
     TArray<ARoom*> Sentinels;
 
-    UPROPERTY(EditAnywhere, Category="Room Map")
-    uint32 MaxRooms;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Room Map")
+    int32 MaxRooms;
 
-    UPROPERTY(VisibleAnywhere, Category="Room Map")
-    uint32 NumRooms;
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Room Map")
+    int32 MinRooms;
+
+    UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category="Room Map")
+    int32 NumRooms;
 
     UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category="Room Map")
     TMap<FPosition, ARoom*> Map;

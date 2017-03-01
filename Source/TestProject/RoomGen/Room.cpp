@@ -25,17 +25,8 @@ FPosition GetPosition(const EDoorDirection& Direction)
     }
 }
 
-FPosition::FPosition(int8 newx, int8 newy)
-{
-    this->x = newx;
-    this->y = newy;
-}
-
-FPosition::FPosition(const FPosition& Other)
-{
-    this->x = Other.x;
-    this->y = Other.y;
-}
+FPosition::FPosition(int8 assigned_x, int8 assigned_y) :
+    x(assigned_x), y(assigned_y) {}
 
 FPosition FPosition::operator+(const FPosition& Other)
 {
@@ -63,29 +54,26 @@ ARoom::ARoom()
     this->OpenDoors.Add(EDoorDirection::DD_West, true);
 }
 
-ARoom::ARoom(const FPosition& MapLocation) : Location(MapLocation) { ARoom(); }
-
 ARoom& ARoom::operator+=(ARoom& Other)
 {
-    if (*this != Other)
-    {
-        throw 1;
-    }
     for (auto& Doorway : Other.Doors)
     {
         if (this->Doors[Doorway.Key] && Other.Doors[Doorway.Key])
         {
-            throw 1;
+            GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Clashing Doors"));
         }
-        this->Doors.Add(Doorway.Key, Doorway.Value);
-        Other.Doors[Doorway.Key]->Doors[GetOpposite(Doorway.Key)] = this;
+        else
+        {
+            this->Doors.Add(Doorway.Key, Doorway.Value);
+            Other.Doors[Doorway.Key]->Doors[GetOpposite(Doorway.Key)] = this;
+        }
     }
     return *this;
 }
 
 bool ARoom::operator==(const ARoom& Other) const
 {
-    return this->Location == Other.Location;
+    return this->LevelName == Other.LevelName;
 }
 bool ARoom::operator !=(const ARoom& Other) const
 {
@@ -106,24 +94,15 @@ bool ARoom::bDoesRoomFit(ARoom* Room) const
     return true;
 }
 
-void ARoom::InsertRoom(ARoom *Room)
+void ARoom::TakePlace(ARoom *Sentinel)
 {
-    for (auto& Doorway : this->Doors)
+    for (auto& Doorway : Sentinel->Doors)
     {
-        Doorway.Value->Doors[GetOpposite(Doorway.Key)] = Room;
-        Room->Doors.Add(Doorway.Key, Doorway.Value);
-        this->Doors[Doorway.Key] = NULL;
+        Doorway.Value->Doors[GetOpposite(Doorway.Key)] = this;
+        this->Doors.Add(Doorway.Key, Doorway.Value);
     }
-    Room->Location = this->Location;
-}
-
-void ARoom::Unlink()
-{
-    for (auto& Doorway : this->Doors)
-    {
-        Doorway.Value->Doors.RemoveAt(GetOpposite(Doorway.Key));
-    }
-    this->Doors.Empty();
+    this->Location = Sentinel->Location;
+    Sentinel->Doors.Empty();
 }
 
 TArray<ARoom*> ARoom::ConstructSentinels()
@@ -133,20 +112,14 @@ TArray<ARoom*> ARoom::ConstructSentinels()
     {
         if (!this->Doors.Contains(Doorway.Key))
         {
-            this->Doors.Add(Doorway.Key, NewObject<ARoom>(this));
-            this->Doors[Doorway.Key]->Location = this->Location + GetPosition(Doorway.Key);
-            Sentinels.Add(this->Doors[Doorway.Key]);
+            ARoom* Sentinel = NewObject<ARoom>(this);
+            Sentinel->Location = this->Location + GetPosition(Doorway.Key);
+            this->Doors.Add(Doorway.Key, Sentinel);
+            Sentinel->Doors.Add(GetOpposite(Doorway.Key), this);
+            Sentinels.Add(Sentinel);
         }
     }
     return Sentinels;
-}
-
-void ARoom::LoadRooms() const
-{
-   for (auto& Doorway : this->Doors)
-   {
-       Doorway.Value->LoadRoom();
-   }
 }
 
 void ARoom::LoadRoom()

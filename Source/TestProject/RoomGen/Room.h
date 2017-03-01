@@ -23,7 +23,6 @@ struct FPosition{
     int8 y;
 
     FPosition(int8 newx=0, int8 newy=0);
-    FPosition(const FPosition& Other);
     FPosition operator+(const FPosition& Other);
     FPosition& operator+=(const FPosition& Other);
     bool operator==(const FPosition& Other) const;
@@ -48,7 +47,6 @@ class TESTPROJECT_API ARoom : public AActor
 
 public:
 	ARoom();// Sets defaults for this object
-	ARoom(const FPosition& MapLocation); // Copy constructor
     ARoom& operator+=(ARoom& Other);
     bool operator==(const ARoom& Other) const;
     bool operator!=(const ARoom& Other) const;
@@ -72,17 +70,11 @@ public:
     bool bDoesRoomFit(ARoom *Room) const;
 
     UFUNCTION(BlueprintCallable, Category="Room")
-    void InsertRoom(ARoom *Room);
-
-    UFUNCTION(BlueprintCallable, Category="Room")
-    void Unlink();
+    void TakePlace(ARoom *Sentinel);
 
     UFUNCTION(BlueprintCallable, Category="Room")
     TArray<ARoom*> ConstructSentinels();
 
     UFUNCTION(BlueprintCallable, Category="Room")
     void LoadRoom();
-
-    UFUNCTION(BlueprintCallable, Category="Room")
-    void LoadRooms() const;
 };
